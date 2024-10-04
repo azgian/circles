@@ -14,7 +14,9 @@
 		ignoreCollision: number; // 충돌 무시 카운터 추가
 	}
 
+	let gameState: 'idle' | 'running' = 'idle';
 	let circles: CircleData[] = [];
+
 	let container: HTMLElement;
 	let containerWidth: number;
 	let containerHeight: number;
@@ -32,8 +34,6 @@
 	onMount(() => {
 		containerWidth = container.clientWidth;
 		containerHeight = container.clientHeight;
-		initializeCircles();
-		startGame();
 		window.addEventListener('resize', handleResize);
 
 		return () => {
@@ -43,14 +43,21 @@
 	});
 
 	const startGame = () => {
-		if (!gameRunning) {
+		if (gameState === 'idle') {
+			gameState = 'running';
+			initializeCircles();
 			gameRunning = true;
 			timer = 0;
-			if (animationId === null) {
-				animate();
-			}
+			animate();
 			startTimer();
 		}
+	};
+
+	const resetGame = () => {
+		stopGame();
+		circles = [];
+		gameState = 'idle';
+		timer = 0;
 	};
 
 	const stopGame = () => {
@@ -141,8 +148,6 @@
 					createNewCircleAtEdge(smallerCircle, 'bottomLeft', 2),
 					createNewCircleAtEdge(smallerCircle, 'bottomRight', 3)
 				];
-
-				// console.log('Collision:', biggerCircle, newCircles); // 디버깅용 로그
 
 				return [biggerCircle, ...newCircles];
 			} else {
@@ -283,12 +288,6 @@
 			animationId = requestAnimationFrame(animate);
 		}
 	};
-
-	const resetGame = () => {
-		stopGame();
-		initializeCircles();
-		startGame();
-	};
 </script>
 
 <div class="game-container">
@@ -302,9 +301,29 @@
 				<Circle num={circle.num} size={circle.size} color={circle.color} />
 			</div>
 		{/each}
-		<div class="timer">Time: {timer} seconds</div>
+		{#if gameState === 'running'}
+			<div class="timer">Time: {timer} seconds</div>
+		{/if}
 	</div>
-	<button class="reset-button" on:click={resetGame}>Reset Game</button>
+	<div class="button-container">
+		<button class="start-button" on:click={startGame}>Start</button>
+		<button class="reset-button" on:click={resetGame}>Reset</button>
+	</div>
+	<div class="rules">
+		<h3>게임 규칙:</h3>
+		<ol>
+			<li>Start 버튼을 눌러 게임을 시작합니다.</li>
+			<li>숫자가 적힌 공들이 화면에 나타나 움직입니다.</li>
+			<li>같은 색의 공들이 충돌하면 큰 숫자의 공이 작은 숫자를 흡수합니다.</li>
+			<li>흡수된 공의 숫자만큼 4개의 새로운 공이 각 모서리에서 생성됩니다.</li>
+			<li>
+				다른 색의 공들이 충돌하면 큰 숫자의 공이 작은 숫자만큼 감소하며 작은 숫자의 공은 사라집니다.
+			</li>
+			<li>숫자가 같은 다른 색 공들이 충돌하면 둘 다 사라집니다.</li>
+			<li>마지막 1개의 공이 남을 때까지 게임이 계속됩니다.</li>
+			<li>Reset 버튼을 눌러 언제든지 게임을 초기화할 수 있습니다.</li>
+		</ol>
+	</div>
 </div>
 
 <style>
@@ -345,21 +364,61 @@
 		font-size: 14px;
 	}
 
-	.reset-button {
+	.button-container {
+		display: flex;
+		justify-content: space-between;
+		width: 100%;
 		margin-top: 20px;
+		z-index: 500;
+	}
+
+	.start-button,
+	.reset-button {
 		padding: 10px 20px;
 		font-size: 16px;
-		background-color: #4caf50;
 		color: white;
 		border: none;
 		border-radius: 5px;
 		cursor: pointer;
 		transition: background-color 0.3s;
-		z-index: 500; /* 추가 */
-		position: relative; /* 추가 */
+	}
+
+	.start-button {
+		background-color: #4caf50;
+		margin: 0 auto;
+	}
+
+	.reset-button {
+		background-color: #f44336;
+	}
+
+	.start-button:hover {
+		background-color: #45a049;
 	}
 
 	.reset-button:hover {
-		background-color: #45a049;
+		background-color: #d32f2f;
+	}
+
+	.rules {
+		margin-top: 20px;
+		text-align: left;
+		max-width: 600px;
+		padding: 15px;
+		border-radius: 10px;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		color: #999;
+	}
+
+	.rules h3 {
+		margin-top: 0;
+	}
+
+	.rules ol {
+		padding-left: 20px;
+	}
+
+	.rules li {
+		margin-bottom: 10px;
 	}
 </style>
