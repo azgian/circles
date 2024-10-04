@@ -42,6 +42,14 @@
 		};
 	});
 
+	const handleResize = () => {
+		containerWidth = container.clientWidth;
+		containerHeight = container.clientHeight;
+		if (gameState === 'running') {
+			resetGame();
+		}
+	};
+
 	const startGame = () => {
 		if (gameState === 'idle') {
 			gameState = 'running';
@@ -82,12 +90,6 @@
 				}
 			}, 1000);
 		}
-	};
-
-	const handleResize = () => {
-		containerWidth = container.clientWidth;
-		containerHeight = container.clientHeight;
-		initializeCircles();
 	};
 
 	const initializeCircles = () => {
