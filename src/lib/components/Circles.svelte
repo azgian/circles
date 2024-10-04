@@ -126,7 +126,6 @@
 				const sin = Math.sin(angle);
 				const cos = Math.cos(angle);
 
-				// 큰 공의 새로운 위치와 속도
 				biggerCircle.x += cos * (circle1.size - distance / 2);
 				biggerCircle.y += sin * (circle1.size - distance / 2);
 				const speed = Math.sqrt(
@@ -135,11 +134,17 @@
 				biggerCircle.dx = cos * speed;
 				biggerCircle.dy = sin * speed;
 
-				const newCircle = createNewCircleAtEdge(smallerCircle);
+				// 각 모서리에서 새로운 공 생성
+				const newCircles = [
+					createNewCircleAtEdge(smallerCircle, 'topLeft', 0),
+					createNewCircleAtEdge(smallerCircle, 'topRight', 1),
+					createNewCircleAtEdge(smallerCircle, 'bottomLeft', 2),
+					createNewCircleAtEdge(smallerCircle, 'bottomRight', 3)
+				];
 
-				console.log('Collision:', biggerCircle, newCircle); // 디버깅용 로그
+				// console.log('Collision:', biggerCircle, newCircles); // 디버깅용 로그
 
-				return [biggerCircle, newCircle];
+				return [biggerCircle, ...newCircles];
 			} else {
 				// 다른 색깔의 공들이 충돌한 경우
 				const winner = circle1.num > circle2.num ? { ...circle1 } : { ...circle2 };
@@ -165,18 +170,52 @@
 		return [circle1, circle2];
 	};
 
-	const createNewCircleAtEdge = (baseCircle: CircleData): CircleData => {
+	const createNewCircleAtEdge = (
+		baseCircle: CircleData,
+		corner: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight',
+		addNum: number
+	): CircleData => {
 		const { size } = baseCircle;
-		const x = containerWidth - size / 2;
-		const y = size / 2;
+		let x, y, dx, dy;
+
+		switch (corner) {
+			case 'topLeft':
+				x = size / 2;
+				y = size / 2;
+				dx = Math.abs((Math.random() + 0.5) * 2);
+				dy = Math.abs((Math.random() + 0.5) * 2);
+				break;
+			case 'topRight':
+				x = containerWidth - size / 2;
+				y = size / 2;
+				dx = -Math.abs((Math.random() + 0.5) * 2);
+				dy = Math.abs((Math.random() + 0.5) * 2);
+				break;
+			case 'bottomLeft':
+				x = size / 2;
+				y = containerHeight - size / 2;
+				dx = Math.abs((Math.random() + 0.5) * 2);
+				dy = -Math.abs((Math.random() + 0.5) * 2);
+				break;
+			case 'bottomRight':
+				x = containerWidth - size / 2;
+				y = containerHeight - size / 2;
+				dx = -Math.abs((Math.random() + 0.5) * 2);
+				dy = -Math.abs((Math.random() + 0.5) * 2);
+				break;
+		}
+
+		const newNum = baseCircle.num + addNum;
 
 		return {
 			...baseCircle,
 			id: getNextId(),
+			num: newNum,
+			color: colors[newNum % 7],
 			x,
 			y,
-			dx: -Math.abs((Math.random() + 0.5) * 4), // 왼쪽 아래 대각선 방향으로 이동
-			dy: Math.abs((Math.random() + 0.5) * 4),
+			dx,
+			dy,
 			ignoreCollision: 30 // 30프레임 동안 충돌 무시
 		};
 	};
@@ -316,6 +355,8 @@
 		border-radius: 5px;
 		cursor: pointer;
 		transition: background-color 0.3s;
+		z-index: 500; /* 추가 */
+		position: relative; /* 추가 */
 	}
 
 	.reset-button:hover {
