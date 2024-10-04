@@ -335,6 +335,13 @@
 		max-width: 800px;
 	}
 
+	@media (max-width: 768px) {
+		.game-container {
+			margin: 10px 10px 100px 10px;
+			width: calc(100% - 20px);
+		}
+	}
+
 	.canvas-container {
 		position: relative;
 		width: 100%;
