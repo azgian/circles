@@ -27,6 +27,12 @@
 		rotationSpeed: number;
 	}
 
+	interface ScoreRecord {
+		time: number;
+		color: string;
+		score: number;
+	}
+
 	let gameState: 'idle' | 'running' = 'idle';
 	let circles: CircleData[] = [];
 	let particles: Particle[] = [];
@@ -48,6 +54,8 @@
 	let gameOver = false;
 	let winningColor = '';
 	let totalSum = 0;
+
+	let scoreRecords: ScoreRecord[] = [];
 
 	onMount(() => {
 		containerWidth = container.clientWidth;
@@ -74,11 +82,6 @@
 			gameOver = false;
 			initializeCircles();
 			gameRunning = true;
-			timer = 0;
-			if (animationId !== null) {
-				cancelAnimationFrame(animationId);
-				animationId = null;
-			}
 			animate();
 			startTimer();
 		}
@@ -93,6 +96,7 @@
 		gameOver = false;
 		winningColor = '';
 		totalSum = 0;
+		scoreRecords = []; // 점수 기록 초기화
 		if (animationId !== null) {
 			cancelAnimationFrame(animationId);
 			animationId = null;
@@ -112,14 +116,19 @@
 	};
 
 	const startTimer = () => {
-		if (timerInterval === null) {
-			timerInterval = setInterval(() => {
-				if (gameRunning) {
-					timer++;
-				} else {
-					stopGame();
-				}
-			}, 1000);
+		if (timerInterval !== null) {
+			clearInterval(timerInterval);
+		}
+		timer = 0;
+		timerInterval = setInterval(() => {
+			timer++;
+		}, 1000);
+	};
+
+	const stopTimer = () => {
+		if (timerInterval !== null) {
+			clearInterval(timerInterval);
+			timerInterval = null;
 		}
 	};
 
@@ -307,6 +316,13 @@
 			gameOver = true;
 			winningColor = Array.from(remainingColors)[0];
 			totalSum = circles.reduce((sum, circle) => sum + circle.num, 0);
+			stopTimer();
+
+			// 새로운 점수 기록 추가
+			scoreRecords = [{ time: timer, color: winningColor, score: totalSum }, ...scoreRecords].slice(
+				0,
+				15
+			);
 		}
 
 		if (animationId !== null) {
@@ -319,6 +335,18 @@
 <div class="game-container">
 	<div class="canvas-container" bind:this={container}>
 		<div class="title-overlay">CIRCLES</div>
+		<div class="timer">{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}</div>
+		<div class="score-records">
+			{#each scoreRecords as record, index}
+				<div class="score-record">
+					<span class="score-time"
+						>{Math.floor(record.time / 60)}:{(record.time % 60).toString().padStart(2, '0')}</span
+					>
+					<span class="score-color" style="background-color: {record.color};"></span>
+					<span class="score-value">{record.score}</span>
+				</div>
+			{/each}
+		</div>
 		{#each circles as circle (circle.id)}
 			<div
 				class="circle-wrapper"
@@ -432,14 +460,12 @@
 
 	.timer {
 		position: absolute;
-		bottom: 10px;
-		left: 50%;
-		transform: translateX(-50%);
-		background-color: rgba(0, 0, 0, 0.5);
-		color: white;
-		padding: 5px 10px;
-		border-radius: 5px;
-		font-size: 14px;
+		top: 10px;
+		right: 10px;
+		font-family: 'Protest Guerrilla', sans-serif;
+		font-size: 24px;
+		color: rgba(255, 255, 255, 0.8);
+		z-index: 10;
 	}
 
 	.button-container {
@@ -592,5 +618,39 @@
 		color: rgba(38, 250, 119, 0.5);
 		pointer-events: none;
 		text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+	}
+
+	.score-records {
+		position: absolute;
+		top: 10px;
+		left: 10px;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		z-index: 10;
+	}
+
+	.score-record {
+		display: flex;
+		align-items: center;
+		margin-bottom: 5px;
+		font-size: 1.25rem;
+		color: rgba(255, 255, 255, 0.8);
+	}
+
+	.score-time {
+		margin-right: 5px;
+	}
+
+	.score-color {
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		margin-right: 5px;
+		border: solid #fff 1px;
+	}
+
+	.score-value {
+		font-weight: bold;
 	}
 </style>
