@@ -31,6 +31,7 @@
 		time: number;
 		color: string;
 		score: number;
+		isLatest?: boolean; // 최근 게임 여부를 나타내는 속성 추가
 	}
 
 	let gameState: 'idle' | 'running' = 'idle';
@@ -56,6 +57,8 @@
 	let totalSum = 0;
 
 	let scoreRecords: ScoreRecord[] = [];
+
+	let finalScore = 0; // 최종 스코어를 저장할 새로운 변수
 
 	onMount(() => {
 		containerWidth = container.clientWidth;
@@ -316,13 +319,16 @@
 			gameOver = true;
 			winningColor = Array.from(remainingColors)[0];
 			totalSum = circles.reduce((sum, circle) => sum + circle.num, 0);
+			finalScore = totalSum * circles.length; // 최종 스코어 계산
 			stopTimer();
 
-			// 새로운 점수 기록 추가
-			scoreRecords = [{ time: timer, color: winningColor, score: totalSum }, ...scoreRecords].slice(
-				0,
-				15
-			);
+			// 새로운 점수 기록 추가 및 정렬
+			scoreRecords = [
+				{ time: timer, color: winningColor, score: finalScore, isLatest: true },
+				...scoreRecords.map((record) => ({ ...record, isLatest: false }))
+			]
+				.sort((a, b) => b.score - a.score)
+				.slice(0, 15);
 		}
 
 		if (animationId !== null) {
@@ -337,13 +343,16 @@
 		<div class="title-overlay">CIRCLES</div>
 		<div class="timer">{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}</div>
 		<div class="score-records">
-			{#each scoreRecords as record, index}
+			{#each scoreRecords as record}
 				<div class="score-record">
 					<span class="score-time"
 						>{Math.floor(record.time / 60)}:{(record.time % 60).toString().padStart(2, '0')}</span
 					>
 					<span class="score-color" style="background-color: {record.color};"></span>
 					<span class="score-value">{record.score}</span>
+					{#if record.isLatest}
+						<span class="chevron">◀</span>
+					{/if}
 				</div>
 			{/each}
 		</div>
@@ -373,8 +382,13 @@
 			<div class="game-over-layer">
 				<div class="game-over-message">
 					<Circle num={0} size={50} color={winningColor} />
-					<small>Total Scores</small>
-					<strong>{totalSum}</strong>
+					<small>토탈 스코어</small>
+					<div>
+						<strong>{totalSum}</strong>
+						<span>× {circles.length}</span>
+					</div>
+					<small>최종 스코어</small>
+					<strong>{finalScore}</strong>
 				</div>
 			</div>
 		{/if}
@@ -572,10 +586,14 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 15px;
+		gap: 10px;
 	}
 	.game-over-message strong {
 		font-size: 1.5rem;
+	}
+	.game-over-message small {
+		font-size: 1rem;
+		opacity: 0.8;
 	}
 
 	.particle {
@@ -639,7 +657,8 @@
 	}
 
 	.score-time {
-		margin-right: 5px;
+		/* margin-right: 5px; */
+		min-width: 50px; /* 시간 표시 영역 고정 */
 	}
 
 	.score-color {
@@ -652,5 +671,14 @@
 
 	.score-value {
 		font-weight: bold;
+		margin-right: 5px;
+		min-width: 50px; /* 점수 표시 영역 고정 */
+		text-align: right;
+	}
+
+	.chevron {
+		font-size: 1rem;
+		color: #26fa77;
+		/* margin-left: 5px; */
 	}
 </style>
