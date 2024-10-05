@@ -671,7 +671,7 @@
 	.score-value {
 		font-weight: bold;
 		margin-right: 5px;
-		min-width: 50px; /* 점수 표시 영역 고정 */
+		min-width: 45px; /* 점수 표시 영역 고정 */
 		text-align: right;
 	}
 
