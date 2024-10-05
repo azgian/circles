@@ -640,7 +640,7 @@
 
 	.score-records {
 		position: absolute;
-		top: 10px;
+		bottom: 10px;
 		left: 10px;
 		display: flex;
 		flex-direction: column;
@@ -657,7 +657,6 @@
 	}
 
 	.score-time {
-		/* margin-right: 5px; */
 		min-width: 50px; /* 시간 표시 영역 고정 */
 	}
 
@@ -679,6 +678,5 @@
 	.chevron {
 		font-size: 1rem;
 		color: #26fa77;
-		/* margin-left: 5px; */
 	}
 </style>
