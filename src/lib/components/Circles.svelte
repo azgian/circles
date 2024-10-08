@@ -587,7 +587,6 @@
 		font-family: 'Protest Guerrilla', sans-serif;
 		font-size: 30px;
 		color: rgba(255, 255, 255, 0.5);
-		/* z-index: 10; */
 		text-align: center;
 		width: 100%;
 	}
@@ -597,9 +596,6 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 10px 20px;
-		font-size: 16px;
-		color: white;
 		border: none;
 		border-radius: 5px;
 		cursor: pointer;
@@ -613,13 +609,19 @@
 
 	.start-button {
 		background-color: #4caf50;
+		padding: 10px 20px;
+		font-size: 16px;
+		color: white;
 		position: absolute;
 		bottom: 10px;
 		right: 10px;
 	}
 
 	.reset-button {
-		background-color: #e0d6d523;
+		background-color: #666;
+		padding: 5px;
+		font-size: 12px;
+		color: #ccc;
 		position: absolute;
 		top: 10px;
 		right: 10px;
@@ -628,9 +630,8 @@
 	.start-button:hover {
 		background-color: #45a049;
 	}
-
 	.reset-button:hover {
-		background-color: #d32f2f;
+		background-color: #555;
 	}
 
 	@media (max-width: 768px) {
