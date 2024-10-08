@@ -642,7 +642,7 @@
 		.canvas-container {
 			height: 100%;
 			margin: 0;
-			/* max-height: calc(100vh - 40px); */
+			max-height: calc(100vh - 150px);
 		}
 		.start-button,
 		.reset-button {
