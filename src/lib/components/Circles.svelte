@@ -73,13 +73,18 @@
 
 	const INITIAL_SPEED = 8; // 초기 속도 상수 정의
 
+	let windowHeight: number;
+
 	onMount(() => {
 		containerWidth = container.clientWidth;
 		containerHeight = container.clientHeight;
 		window.addEventListener('resize', handleResize);
+		updateWindowHeight();
+		window.addEventListener('resize', updateWindowHeight);
 
 		return () => {
 			window.removeEventListener('resize', handleResize);
+			window.removeEventListener('resize', updateWindowHeight);
 			stopGame();
 		};
 	});
@@ -91,6 +96,10 @@
 			resetGame();
 		}
 	};
+
+	function updateWindowHeight() {
+		windowHeight = window.innerHeight;
+	}
 
 	const startGame = () => {
 		if (gameState === 'idle' || gameOver) {
@@ -418,7 +427,9 @@
 	};
 </script>
 
-<div class="game-container">
+<svelte:window bind:innerHeight={windowHeight} />
+
+<div class="game-container" style="--window-height: {windowHeight}px;">
 	<div class="canvas-container" bind:this={container}>
 		<div class="title-overlay">CIRCLES</div>
 		<div class="timer">{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}</div>
@@ -535,7 +546,7 @@
 		align-items: center;
 		margin: auto;
 		width: calc(100vw - 50px);
-		height: calc(100vh - 50px);
+		height: calc(var(--window-height, 100vh) - 50px);
 	}
 
 	.canvas-container {
@@ -543,11 +554,12 @@
 		width: 100%;
 		max-width: 800px;
 		height: 100%;
-		max-height: 800px;
+		max-height: calc(var(--window-height, 100vh) - 100px);
 		overflow: hidden;
 		box-shadow: 0 0 20px rgba(38, 250, 119, 0.5);
 		border-radius: 10px;
-		margin-top: 50px;
+		margin-top: 25px;
+		margin-bottom: 25px;
 	}
 
 	.circle-wrapper {
@@ -614,13 +626,13 @@
 		.game-container {
 			margin: 10px;
 			width: calc(100vw - 20px);
-			height: calc(100vh - 20px);
-			max-height: 100vh;
+			height: calc(var(--window-height, 100vh) - 20px);
 		}
 		.canvas-container {
 			height: 100%;
-			margin-top: 0;
-			max-height: 100vh;
+			margin-top: 10px;
+			margin-bottom: 10px;
+			max-height: calc(var(--window-height, 100vh) - 40px);
 		}
 		.start-button,
 		.reset-button {
