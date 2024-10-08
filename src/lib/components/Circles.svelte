@@ -486,9 +486,9 @@
 					<li>공의 색깔은 무지개색이며 공의 숫자를 7로 나눈 나머지로 색이 정해집니다.</li>
 					<li>같은 색의 공들이 충돌하면 서로 팅겨져 나갑니다.</li>
 					<li>
-						다른 색의 공들이 충돌하면 큰 숫자의 공이 작은 숫자의 공을 흡수하며 작은 숫자의 공은
-						사라집니다.
+						다른 색의 공들이 충돌하면 큰 숫자에서 작은 숫자를 뺀 후, 작은 숫자의 공은 사라집니다.
 					</li>
+					<li>5초마다 우측벽에 10배 보너스가 적용되어 충돌시 해당 공 숫자가 10배가 됩니다.</li>
 					<li>다른 색 공 두개만 남았을 때 작은 숫자의 공의 속도가 빨라집니다.</li>
 					<li>한 가지 색상의 공만 남으면 게임이 종료됩니다.</li>
 					<li>Reset 버튼을 눌러 언제든지 게임을 초기화할 수 있습니다.</li>
@@ -527,15 +527,6 @@
 		</div>
 	</div>
 </div>
-
-<!-- .game-container {
-			margin: 10px;
-			width: calc(100vw - 20px);
-			height: calc(100vh - 20px);
-		}
-		.canvas-container {
-			height: calc(100vh - 20px);
-		} -->
 
 <style>
 	.game-container {
@@ -646,11 +637,10 @@
 
 	.rules {
 		position: absolute;
-		top: 100px;
-		left: 0px;
-		text-align: left;
-		max-width: 450px;
-		padding: 15px;
+		top: 150px;
+		left: 50%;
+		max-width: 500px;
+		margin-left: -225px;
 		color: #999;
 	}
 
@@ -664,6 +654,14 @@
 
 	.rules li {
 		margin-bottom: 10px;
+	}
+
+	@media (max-width: 500px) {
+		.rules {
+			left: 0px;
+			margin-left: 0px;
+			padding: 15px;
+		}
 	}
 
 	.game-over-layer {
