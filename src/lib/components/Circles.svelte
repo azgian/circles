@@ -41,8 +41,8 @@
 	let particles: Particle[] = [];
 
 	let container: HTMLElement;
-	let containerWidth: number;
-	let containerHeight: number;
+	let containerWidth: number = 0;
+	let containerHeight: number = 0;
 
 	const colors = ['#e60000', '#e67300', '#e6e600', '#00b300', '#0000e6', '#4b0082', '#8600b3'];
 
@@ -76,26 +76,24 @@
 	let windowHeight: number;
 
 	onMount(() => {
-		containerWidth = container.clientWidth;
-		containerHeight = container.clientHeight;
-		window.addEventListener('resize', handleResize);
+		updateContainerSize();
+		window.addEventListener('resize', updateContainerSize);
 		updateWindowHeight();
 		window.addEventListener('resize', updateWindowHeight);
 
 		return () => {
-			window.removeEventListener('resize', handleResize);
+			window.removeEventListener('resize', updateContainerSize);
 			window.removeEventListener('resize', updateWindowHeight);
 			stopGame();
 		};
 	});
 
-	const handleResize = () => {
-		containerWidth = container.clientWidth;
-		containerHeight = container.clientHeight;
-		if (gameState === 'running') {
-			resetGame();
+	function updateContainerSize() {
+		if (container) {
+			containerWidth = container.clientWidth;
+			containerHeight = container.clientHeight;
 		}
-	};
+	}
 
 	function updateWindowHeight() {
 		windowHeight = window.innerHeight;
@@ -105,11 +103,15 @@
 		if (gameState === 'idle' || gameOver) {
 			gameState = 'running';
 			gameOver = false;
-			initializeCircles();
-			gameRunning = true;
-			animate();
-			startTimer();
-			startRightWallMultiplierTimer();
+			// 게임 시작 전 컨테이너 크기 업데이트를 지연시킵니다.
+			setTimeout(() => {
+				updateContainerSize();
+				initializeCircles();
+				gameRunning = true;
+				animate();
+				startTimer();
+				startRightWallMultiplierTimer();
+			}, 100);
 		}
 	};
 
@@ -427,9 +429,9 @@
 	};
 </script>
 
-<svelte:window bind:innerHeight={windowHeight} />
+<svelte:window on:resize={updateContainerSize} />
 
-<div class="game-container" style="--window-height: {windowHeight}px;">
+<div class="game-container">
 	<div class="canvas-container" bind:this={container}>
 		<div class="title-overlay">CIRCLES</div>
 		<div class="timer">{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}</div>
@@ -545,16 +547,17 @@
 		flex-direction: column;
 		align-items: center;
 		margin: auto;
-		width: calc(100vw - 50px);
-		height: calc(var(--window-height, 100vh) - 50px);
+		width: 100%;
+		height: 100vh;
+		max-height: 100vh;
 	}
 
 	.canvas-container {
 		position: relative;
 		width: 100%;
 		max-width: 800px;
-		height: 100%;
-		max-height: calc(var(--window-height, 100vh) - 100px);
+		height: calc(100vh - 50px);
+		max-height: calc(100vh - 50px);
 		overflow: hidden;
 		box-shadow: 0 0 20px rgba(38, 250, 119, 0.5);
 		border-radius: 10px;
@@ -624,15 +627,15 @@
 
 	@media (max-width: 768px) {
 		.game-container {
-			margin: 10px;
-			width: calc(100vw - 20px);
-			height: calc(var(--window-height, 100vh) - 20px);
+			margin: 0;
+			width: 100%;
+			height: 100vh;
 		}
 		.canvas-container {
-			height: 100%;
+			height: calc(100vh - 20px);
+			max-height: calc(100vh - 20px);
 			margin-top: 10px;
 			margin-bottom: 10px;
-			max-height: calc(var(--window-height, 100vh) - 40px);
 		}
 		.start-button,
 		.reset-button {
