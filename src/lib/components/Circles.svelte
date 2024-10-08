@@ -77,6 +77,9 @@
 
 	let isMobile: boolean;
 
+	// scoreRecords를 역순으로 정렬하는 함수
+	$: sortedScoreRecords = [...scoreRecords].sort((a, b) => b.score - a.score);
+
 	onMount(() => {
 		updateContainerSize();
 		window.addEventListener('resize', updateContainerSize);
@@ -421,11 +424,27 @@
 				}))
 			);
 
-			// 스코어 기록 추가
-			scoreRecords = [
-				{ time: timer, color: winningColor, score: finalScore, isLatest: true },
-				...scoreRecords.map((record) => ({ ...record, isLatest: false })).slice(0, 4)
-			];
+			// 새로운 스코어 추가 로직
+			const newRecord = { time: timer, color: winningColor, score: finalScore, isLatest: true };
+
+			// 기존 스코어들의 isLatest를 false로 설정
+			scoreRecords = scoreRecords.map((record) => ({ ...record, isLatest: false }));
+
+			if (scoreRecords.length < 10) {
+				// 10개 미만일 경우 그냥 추가
+				scoreRecords = [...scoreRecords, newRecord];
+			} else {
+				// 10개 이상일 경우 가장 낮은 점수와 비교
+				const lowestScore = Math.min(...scoreRecords.map((r) => r.score));
+				if (finalScore > lowestScore) {
+					// 새 점수가 더 높으면 가장 낮은 점수를 제거하고 새 점수 추가
+					scoreRecords = scoreRecords.filter((r) => r.score !== lowestScore);
+					scoreRecords = [...scoreRecords, newRecord];
+				}
+			}
+
+			// 점수 정렬
+			scoreRecords = scoreRecords.sort((a, b) => a.score - b.score);
 		}
 
 		// 게임 오버 상태에서도 공들을 계속 움직이게 함
@@ -446,20 +465,18 @@
 	<div class="canvas-container" bind:this={container}>
 		<div class="title-overlay">CIRCLES</div>
 		<div class="timer">{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}</div>
-		<div class="score-records">
-			{#each scoreRecords as record}
-				<div class="score-record">
-					<span class="score-time"
-						>{Math.floor(record.time / 60)}:{(record.time % 60).toString().padStart(2, '0')}</span
-					>
+		<ol class="score-records">
+			{#each sortedScoreRecords as record, index}
+				<li class="score-record" class:latest={record.isLatest}>
+					<span class="score-time">{record.time}s</span>
 					<span class="score-color" style="background-color: {record.color};"></span>
 					<span class="score-value">{record.score}</span>
 					{#if record.isLatest}
-						<span class="chevron">◀</span>
+						<span class="chevron">▶</span>
 					{/if}
-				</div>
+				</li>
 			{/each}
-		</div>
+		</ol>
 		{#each $circles as circle (circle.id)}
 			<div
 				class="circle-wrapper"
@@ -766,11 +783,13 @@
 	.score-records {
 		position: absolute;
 		bottom: 10px;
-		left: 10px;
+		left: 0px;
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
-		/* z-index: 10; */
+		padding: 0;
+		margin: 0;
+		list-style-type: none;
 	}
 
 	.score-record {
@@ -779,10 +798,40 @@
 		margin-bottom: 5px;
 		font-size: 1.25rem;
 		color: rgba(255, 255, 255, 0.3);
+		position: relative;
+		padding-left: 30px;
+	}
+
+	.score-record::before {
+		content: counter(score-counter);
+		position: absolute;
+		left: 0;
+		min-width: 25px;
+		text-align: right;
+		color: rgba(255, 255, 255, 0.5);
+		font-size: 1rem;
+	}
+
+	.score-record:nth-child(n) {
+		counter-increment: score-counter;
+	}
+
+	.score-records {
+		counter-reset: score-counter;
+	}
+
+	.score-record.latest {
+		color: rgba(255, 255, 255, 0.8);
+	}
+
+	.score-record.latest::before {
+		color: rgba(38, 250, 119, 0.8);
 	}
 
 	.score-time {
-		min-width: 50px; /* 시간 표시 영역 고정 */
+		min-width: 40px;
+		text-align: right;
+		margin-right: 10px;
 	}
 
 	.score-color {
