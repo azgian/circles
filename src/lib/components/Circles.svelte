@@ -167,10 +167,6 @@
 
 	const stopGame = () => {
 		gameRunning = false;
-		if (animationId !== null) {
-			cancelAnimationFrame(animationId);
-			animationId = null;
-		}
 		if (timerInterval !== null) {
 			clearInterval(timerInterval);
 			timerInterval = null;
@@ -178,6 +174,7 @@
 		if (rightWallMultiplierTimer !== null) {
 			clearInterval(rightWallMultiplierTimer);
 		}
+		// animationId를 취소하지 않음
 	};
 
 	const startTimer = () => {
@@ -415,12 +412,12 @@
 			stopGame();
 			resetRightWallMultiplier();
 
-			// 모든 공의 속도를 초기 속도로 리셋
+			// 모든 공의 속도를 초기 속도의 1/2로 줄임
 			circles.update((circles) =>
 				circles.map((circle) => ({
 					...circle,
-					dx: Math.sign(circle.dx) * INITIAL_SPEED,
-					dy: Math.sign(circle.dy) * INITIAL_SPEED
+					dx: (INITIAL_SPEED / 2) * Math.sign(circle.dx),
+					dy: (INITIAL_SPEED / 2) * Math.sign(circle.dy)
 				}))
 			);
 
@@ -429,6 +426,11 @@
 				{ time: timer, color: winningColor, score: finalScore, isLatest: true },
 				...scoreRecords.map((record) => ({ ...record, isLatest: false })).slice(0, 4)
 			];
+		}
+
+		// 게임 오버 상태에서도 공들을 계속 움직이게 함
+		if (gameOver) {
+			animationId = requestAnimationFrame(animate);
 		}
 
 		if (animationId !== null) {
