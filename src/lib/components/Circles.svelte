@@ -75,15 +75,20 @@
 
 	let windowHeight: number;
 
+	let isMobile: boolean;
+
 	onMount(() => {
 		updateContainerSize();
 		window.addEventListener('resize', updateContainerSize);
 		updateWindowHeight();
 		window.addEventListener('resize', updateWindowHeight);
+		checkMobile();
+		window.addEventListener('resize', checkMobile);
 
 		return () => {
 			window.removeEventListener('resize', updateContainerSize);
 			window.removeEventListener('resize', updateWindowHeight);
+			window.removeEventListener('resize', checkMobile);
 			stopGame();
 		};
 	});
@@ -97,6 +102,10 @@
 
 	function updateWindowHeight() {
 		windowHeight = window.innerHeight;
+	}
+
+	function checkMobile() {
+		isMobile = window.innerWidth <= 768;
 	}
 
 	const startGame = () => {
@@ -431,7 +440,7 @@
 
 <svelte:window on:resize={updateContainerSize} />
 
-<div class="game-container">
+<div class="game-container" class:mobile={isMobile}>
 	<div class="canvas-container" bind:this={container}>
 		<div class="title-overlay">CIRCLES</div>
 		<div class="timer">{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')}</div>
@@ -547,8 +556,8 @@
 		flex-direction: column;
 		align-items: center;
 		margin: auto;
-		width: 100%;
-		height: 100vh;
+		width: calc(100vw - 50px);
+		height: calc(100vh - 50px);
 		max-height: 100vh;
 	}
 
@@ -556,13 +565,12 @@
 		position: relative;
 		width: 100%;
 		max-width: 800px;
-		height: calc(100vh - 50px);
-		max-height: calc(100vh - 50px);
+		height: 100%;
+		max-height: calc(100vh - 100px);
 		overflow: hidden;
 		box-shadow: 0 0 20px rgba(38, 250, 119, 0.5);
 		border-radius: 10px;
-		margin-top: 25px;
-		margin-bottom: 25px;
+		margin-top: 50px;
 	}
 
 	.circle-wrapper {
@@ -627,15 +635,15 @@
 
 	@media (max-width: 768px) {
 		.game-container {
-			margin: 0;
-			width: 100%;
-			height: 100vh;
+			margin: 10px;
+			width: calc(100vw - 20px);
+			height: calc(100vh - 20px);
 		}
 		.canvas-container {
-			height: calc(100vh - 20px);
-			max-height: calc(100vh - 20px);
+			height: 100%;
 			margin-top: 10px;
 			margin-bottom: 10px;
+			max-height: calc(100vh - 40px);
 		}
 		.start-button,
 		.reset-button {
