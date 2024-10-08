@@ -641,9 +641,8 @@
 		}
 		.canvas-container {
 			height: 100%;
-			margin-top: 10px;
-			margin-bottom: 10px;
-			max-height: calc(100vh - 40px);
+			margin: 0;
+			/* max-height: calc(100vh - 40px); */
 		}
 		.start-button,
 		.reset-button {
