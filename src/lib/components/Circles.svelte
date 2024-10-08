@@ -660,7 +660,7 @@
 
 	.rules {
 		position: absolute;
-		top: 150px;
+		top: 50px;
 		left: 50%;
 		max-width: 500px;
 		margin-left: -225px;
